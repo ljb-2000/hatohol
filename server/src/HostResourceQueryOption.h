@@ -174,6 +174,7 @@ protected:
 	std::string getColumnNameCommon(
 	  const DBAgent::TableProfile &tableProfile, const size_t &idx) const;
 	bool isHostgroupEnumerationInCondition(void) const;
+	std::string getJoinClauseWithGlobalHostId(void) const;
 
 private:
 	struct Impl;
