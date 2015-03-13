@@ -71,6 +71,24 @@ protected:
 
 	static std::string makeItemBrief(const ItemGroup *itemItemGroup);
 
+	/**
+	 * Fill the following members if they are not set, with the
+	 * corresponding trigger information.
+	 *   - severity
+	 *   - globalHostId
+	 *   - hostIdInServer
+	 *   - hostName
+	 *   - brief
+	 *   - extenededInfo
+	 *
+	 * @param eventInfo An EventInfo instance to be set.
+	 *
+	 * @return
+	 * true if the corresponding trigger is found and the values are set.
+	 * Otherwise false is returned.
+	 */
+	static bool mergeTriggerInfo(EventInfo &eventInfo);
+
 	static bool transformEventItemGroupToEventInfo(
 	  EventInfo &eventInfo, const ItemGroup *event);
 
