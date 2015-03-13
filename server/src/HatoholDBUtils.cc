@@ -51,16 +51,6 @@ static bool findHostCache(
 	return false;
 }
 
-static bool takeTriggerInfo(TriggerInfo &triggerInfo,
-  const ServerIdType &serverId, const TriggerIdType &triggerId)
-{
-	ThreadLocalDBCache cache;
-	TriggersQueryOption option(USER_ID_SYSTEM);
-	option.setTargetServerId(serverId);
-	option.setTargetId(triggerId);
-	return cache.getMonitoring().getTriggerInfo(triggerInfo, option);
-}
-
 // ----------------------------------------------------------------------------
 // Public methods
 // ----------------------------------------------------------------------------
@@ -354,49 +344,6 @@ string HatoholDBUtils::makeItemBrief(const ItemGroup *itemItemGroup)
 	return brief;
 }
 
-template <typename T>
-static void substIfNeeded(T &lhs, const T &rhs, const T &initialValue)
-{
-	if (lhs == initialValue)
-		lhs = rhs;
-}
-
-bool HatoholDBUtils::mergeTriggerInfo(EventInfo &eventInfo)
-{
-	struct {
-		void operator()(string &lhs, const string &rhs)
-		{
-			substIfNeeded<string>(lhs, rhs, "");
-		}
-
-		void operator()(HostIdType &lhs, const HostIdType &rhs)
-		{
-			substIfNeeded<HostIdType>(lhs, rhs, INVALID_HOST_ID);
-		}
-
-		void operator()(
-		  TriggerSeverityType &lhs, const TriggerSeverityType &rhs)
-		{
-			substIfNeeded<TriggerSeverityType>(
-			  lhs, rhs, TRIGGER_SEVERITY_UNKNOWN);
-		}
-	} setIfNeeded;
-
-	TriggerInfo trigInfo;
-	const bool succeeded =
-	  takeTriggerInfo(trigInfo, eventInfo.serverId, eventInfo.triggerId);
-	if (!succeeded)
-		return false;
-
-	setIfNeeded(eventInfo.severity,       trigInfo.severity);
-	setIfNeeded(eventInfo.globalHostId,   trigInfo.globalHostId);
-	setIfNeeded(eventInfo.hostIdInServer, trigInfo.hostIdInServer);
-	setIfNeeded(eventInfo.hostName,       trigInfo.hostName);
-	setIfNeeded(eventInfo.brief,          trigInfo.brief);
-	setIfNeeded(eventInfo.extendedInfo,   trigInfo.extendedInfo);
-	return true;
-}
-
 bool HatoholDBUtils::transformEventItemGroupToEventInfo(
   EventInfo &eventInfo, const ItemGroup *eventItemGroup)
 {
@@ -437,8 +384,6 @@ bool HatoholDBUtils::transformEventItemGroupToEventInfo(
 		MLPL_ERR("Unknown type: %d\n", eventInfo.type);
 		eventInfo.status = TRIGGER_STATUS_UNKNOWN;
 	}
-
-	mergeTriggerInfo(eventInfo);
 
 	return true;
 }
